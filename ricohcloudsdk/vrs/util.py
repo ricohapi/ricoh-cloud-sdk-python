@@ -12,20 +12,21 @@ import requests
 from ricohcloudsdk.exceptions import ClientError, ServerError
 
 SUPPORTED_IMAGE_TYPE = {'jpeg', 'png'}
+UNSUPPORTED_ERROR = 'One of the image resource was unsupported format.'
+RESOURCE_ERROR = 'An invalid value was specified for one of the image resource parameters.'
+COMBINATION_ERROR = 'Different combinations for image resource format are not allowed.'
 
 
 def raise_unsupported_error():
-    raise ValueError('One of the image resource was unsupported format.')
+    raise ValueError(UNSUPPORTED_ERROR)
 
 
 def raise_resource_error():
-    raise ValueError(
-        'An invalid value was specified for one of the image resource parameters.')
+    raise ValueError(RESOURCE_ERROR)
 
 
 def raise_combination_error():
-    raise ValueError(
-        'Different combinations for image resource format are not allowed.')
+    raise ValueError(COMBINATION_ERROR)
 
 
 def get_type(resource):

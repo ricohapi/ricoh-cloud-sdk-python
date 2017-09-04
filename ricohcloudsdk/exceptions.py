@@ -19,7 +19,7 @@ class BaseError(Exception):
             code = _UNDEFINED
             message = response.get('message', _UNDEFINED)
         elif 'error' in response:
-            code = response['error'].get('code', _UNDEFINED),
+            code = response['error'].get('code', _UNDEFINED)
             message = response['error'].get('message', _UNDEFINED)
         else:
             code = _UNDEFINED

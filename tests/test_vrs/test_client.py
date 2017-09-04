@@ -7,6 +7,7 @@ import pytest
 import mock
 from mock import Mock, MagicMock
 from requests.exceptions import RequestException
+from ricohcloudsdk.vrs import util
 from ricohcloudsdk.vrs.client import VisualRecognition
 from ricohcloudsdk.exceptions import ClientError
 
@@ -294,16 +295,19 @@ class TestMethodError(TestCase):
         self.vrs = VisualRecognition(self.aclient)
 
     def test_detect_humans_file_not_found(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_humans('image.jpg')
+        assert util.RESOURCE_ERROR == str(excinfo.value)
 
     def test_detect_faces_file_not_found(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_faces('image.jpg')
+        assert util.RESOURCE_ERROR == str(excinfo.value)
 
     def test_compare_faces_file_not_found(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.compare_faces('image_1.jpg', 'image_2.jpg')
+        assert util.RESOURCE_ERROR == str(excinfo.value)
 
     @mock.patch('json.loads')
     @mock.patch('requests.post')
@@ -312,8 +316,11 @@ class TestMethodError(TestCase):
         req.return_value.status_code = 404
         ret.return_value = {'error': {'code': 'resource_not_found',
                                       'message': 'The specified resource does not exist.'}}
-        with pytest.raises(ClientError):
+        try:
             self.vrs.detect_humans('http://test.com/test.jpg')
+        except ClientError as excinfo:
+            assert ret.return_value == excinfo.response
+            assert req.return_value.status_code == excinfo.status_code
 
     @mock.patch('json.loads')
     @mock.patch('requests.post')
@@ -322,8 +329,11 @@ class TestMethodError(TestCase):
         req.return_value.status_code = 404
         ret.return_value = {'error': {'code': 'resource_not_found',
                                       'message': 'The specified resource does not exist.'}}
-        with pytest.raises(ClientError):
+        try:
             self.vrs.detect_faces('http://test.com/test.jpg')
+        except ClientError as excinfo:
+            assert ret.return_value == excinfo.response
+            assert req.return_value.status_code == excinfo.status_code
 
     @mock.patch('json.loads')
     @mock.patch('requests.post')
@@ -332,9 +342,12 @@ class TestMethodError(TestCase):
         req.return_value.status_code = 404
         ret.return_value = {'error': {'code': 'resource_not_found',
                                       'message': 'The specified resource does not exist.'}}
-        with pytest.raises(ClientError):
+        try:
             self.vrs.compare_faces(
                 'http://test.com/test_1.jpg', 'http://test.com/test_2.jpg')
+        except ClientError as excinfo:
+            assert ret.return_value == excinfo.response
+            assert req.return_value.status_code == excinfo.status_code
 
     @mock.patch('imghdr.what')
     @mock.patch('os.path.isfile')
@@ -346,8 +359,9 @@ class TestMethodError(TestCase):
         opn.read_data = b'readdata'
         isfile.return_value = True
         imghdr.return_value = 'gif'
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_humans('image.gif')
+        assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
     @mock.patch('imghdr.what')
     @mock.patch('os.path.isfile')
@@ -359,8 +373,9 @@ class TestMethodError(TestCase):
         opn.read_data = b'readdata'
         isfile.return_value = True
         imghdr.return_value = 'gif'
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_faces('image.gif')
+        assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
     @mock.patch('imghdr.what')
     @mock.patch('os.path.isfile')
@@ -372,8 +387,9 @@ class TestMethodError(TestCase):
         opn.read_data = b'readdata'
         isfile.return_value = True
         imghdr.return_value = 'gif'
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.compare_faces('image_1.gif', 'image_2.gif')
+        assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
     @mock.patch('imghdr.what')
     @mock.patch('os.path.isfile')
@@ -383,7 +399,8 @@ class TestMethodError(TestCase):
         opn.read_data = b'readdata'
         isfile.side_effect = [True, False]
         imghdr.return_value = 'jpeg'
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as excinfo:
             self.vrs.compare_faces(
                 'test_1.jpeg', 'https://test.co,/test.jpg'
             )
+        assert util.COMBINATION_ERROR == str(excinfo.value)
