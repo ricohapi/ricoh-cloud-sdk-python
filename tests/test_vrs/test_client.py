@@ -95,7 +95,7 @@ class TestMethodOK(TestCase):
         with pytest.raises(TypeError):
             self.vrs.detect_faces()
 
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_detect_faces_uri(self, req):
         req.return_value.text = json.dumps(self.__fd_expected)
         req.return_value.status_code = 200
@@ -103,48 +103,52 @@ class TestMethodOK(TestCase):
             'http://test.com/test.jpg')
         headers = make_headers('application/json')
         payload = json.dumps({'image': 'http://test.com/test.jpg'})
-        req.assert_called_once_with(
-            ENDPOINT + '/detect_faces', headers=headers, data=payload)
+        req.assert_called_once_with('POST',
+                                    ENDPOINT + '/detect_faces', headers=headers, data=payload)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_faces_jpeg(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_faces_jpeg(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__fd_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'jpeg'
+        img = MagicMock()
+        img.format.lower.return_value = 'jpeg'
+        pil_open.return_value = img
         assert self.__fd_expected == self.vrs.detect_faces('test.jpg')
         isfile.assert_called_once_with('test.jpg')
-        imghdr.assert_called_once_with('test.jpg')
+        pil_open.assert_called_once_with('test.jpg')
         opn.assert_called_once_with('test.jpg', 'rb')
         headers = make_headers('image/jpeg')
         req.assert_called_once_with(
-            ENDPOINT + '/detect_faces', headers=headers, data=opn())
+            'POST', ENDPOINT + '/detect_faces', headers=headers, data=opn())
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_faces_png(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_faces_png(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__fd_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'png'
+        img = MagicMock()
+        img.format.lower.return_value = 'png'
+        pil_open.return_value = img
         assert self.__fd_expected == self.vrs.detect_faces('test.png')
         isfile.assert_called_once_with('test.png')
-        imghdr.assert_called_once_with('test.png')
+        pil_open.assert_called_once_with('test.png')
         opn.assert_called_once_with('test.png', 'rb')
         headers = make_headers('image/png')
         req.assert_called_once_with(
-            ENDPOINT + '/detect_faces', headers=headers, data=opn())
+            'POST', ENDPOINT + '/detect_faces', headers=headers, data=opn())
 
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_detect_humans_uri(self, req):
         req.return_value.text = json.dumps(self.__hd_expected)
         req.return_value.status_code = 200
@@ -153,47 +157,51 @@ class TestMethodOK(TestCase):
         headers = make_headers('application/json')
         payload = json.dumps({'image': 'http://test.com/test.jpg'})
         req.assert_called_once_with(
-            ENDPOINT + '/detect_humans', headers=headers, data=payload)
+            'POST', ENDPOINT + '/detect_humans', headers=headers, data=payload)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_humans_jpeg(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_humans_jpeg(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__hd_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'jpeg'
+        img = MagicMock()
+        img.format.lower.return_value = 'jpeg'
+        pil_open.return_value = img
         assert self.__hd_expected == self.vrs.detect_humans('test.jpg')
         isfile.assert_called_once_with('test.jpg')
-        imghdr.assert_called_once_with('test.jpg')
+        pil_open.assert_called_once_with('test.jpg')
         opn.assert_called_once_with('test.jpg', 'rb')
         headers = make_headers('image/jpeg')
         req.assert_called_once_with(
-            ENDPOINT + '/detect_humans', headers=headers, data=opn())
+            'POST', ENDPOINT + '/detect_humans', headers=headers, data=opn())
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_humans_png(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_humans_png(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__hd_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'png'
+        img = MagicMock()
+        img.format.lower.return_value = 'png'
+        pil_open.return_value = img
         assert self.__hd_expected == self.vrs.detect_humans('test.png')
         isfile.assert_called_once_with('test.png')
-        imghdr.assert_called_once_with('test.png')
+        pil_open.assert_called_once_with('test.png')
         opn.assert_called_once_with('test.png', 'rb')
         headers = make_headers('image/png')
         req.assert_called_once_with(
-            ENDPOINT + '/detect_humans', headers=headers, data=opn())
+            'POST', ENDPOINT + '/detect_humans', headers=headers, data=opn())
 
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_compare_faces_uri(self, req):
         req.return_value.text = json.dumps(self.__fr_expected)
         req.return_value.status_code = 200
@@ -207,19 +215,21 @@ class TestMethodOK(TestCase):
             }
         )
         req.assert_called_once_with(
-            ENDPOINT + '/compare_faces', headers=headers, data=payload)
+            'POST', ENDPOINT + '/compare_faces', headers=headers, data=payload)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_compare_faces_jpeg_jpeg(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_compare_faces_jpeg_jpeg(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__fr_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'jpeg'
+        img = MagicMock()
+        img.format.lower.side_effect = ['jpeg', 'jpeg']
+        pil_open.return_value = img
         assert self.__fr_expected == self.vrs.compare_faces(
             'test_1.jpg', 'test_2.jpg'
         )
@@ -232,19 +242,21 @@ class TestMethodOK(TestCase):
             'target': opn()
         }
         req.assert_called_once_with(
-            ENDPOINT + '/compare_faces', headers=headers, files=payload)
+            'POST', ENDPOINT + '/compare_faces', headers=headers, files=payload)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_compare_faces_png_png(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_compare_faces_png_png(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__fr_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'png'
+        img = MagicMock()
+        img.format.lower.side_effect = ['png', 'png']
+        pil_open.return_value = img
         assert self.__fr_expected == self.vrs.compare_faces(
             'test_1.png', 'test_2.png'
         )
@@ -257,19 +269,21 @@ class TestMethodOK(TestCase):
             'target': opn()
         }
         req.assert_called_once_with(
-            ENDPOINT + '/compare_faces', headers=headers, files=payload)
+            'POST', ENDPOINT + '/compare_faces', headers=headers, files=payload)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_compare_faces_jpeg_png(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_compare_faces_jpeg_png(self, req, opn, isfile, pil_open):
         req.return_value.text = json.dumps(self.__fr_expected)
         req.return_value.status_code = 200
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.side_effect = ['jpeg', 'png']
+        img = MagicMock()
+        img.format.lower.side_effect = ['jpeg', 'png']
+        pil_open.return_value = img
         assert self.__fr_expected == self.vrs.compare_faces(
             'test_1.jpeg', 'test_2.png'
         )
@@ -282,7 +296,7 @@ class TestMethodOK(TestCase):
             'target': opn()
         }
         req.assert_called_once_with(
-            ENDPOINT + '/compare_faces', headers=headers, files=payload)
+            'POST', ENDPOINT + '/compare_faces', headers=headers, files=payload)
 
 
 class TestMethodError(TestCase):
@@ -310,7 +324,7 @@ class TestMethodError(TestCase):
         assert util.RESOURCE_ERROR == str(excinfo.value)
 
     @mock.patch('json.loads')
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_detect_humans_resource_not_found(self, req, ret):
         req.return_value.text = 'test'
         req.return_value.status_code = 404
@@ -323,7 +337,7 @@ class TestMethodError(TestCase):
             assert req.return_value.status_code == excinfo.status_code
 
     @mock.patch('json.loads')
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_detect_faces_resource_not_found(self, req, ret):
         req.return_value.text = 'test'
         req.return_value.status_code = 404
@@ -336,7 +350,7 @@ class TestMethodError(TestCase):
             assert req.return_value.status_code == excinfo.status_code
 
     @mock.patch('json.loads')
-    @mock.patch('requests.post')
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
     def test_compare_faces_resource_not_found(self, req, ret):
         req.return_value.text = 'test'
         req.return_value.status_code = 404
@@ -349,56 +363,64 @@ class TestMethodError(TestCase):
             assert ret.return_value == excinfo.response
             assert req.return_value.status_code == excinfo.status_code
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_humans_gif(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_humans_gif(self, req, opn, isfile, pil_open):
         req.side_effect = RequestException
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'gif'
+        img = MagicMock()
+        img.format.lower.return_value = 'gif'
+        pil_open.return_value = img
         with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_humans('image.gif')
         assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_detect_faces_gif(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_detect_faces_gif(self, req, opn, isfile, pil_open):
         req.side_effect = RequestException
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'gif'
+        img = MagicMock()
+        img.format.lower.return_value = 'gif'
+        pil_open.return_value = img
         with pytest.raises(ValueError) as excinfo:
             self.vrs.detect_faces('image.gif')
         assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    @mock.patch('requests.post')
-    def test_compare_faces_gif(self, req, opn, isfile, imghdr):
+    @mock.patch('ricohcloudsdk.vrs.util.SESSION.request')
+    def test_compare_faces_gif(self, req, opn, isfile, pil_open):
         req.side_effect = RequestException
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.return_value = True
-        imghdr.return_value = 'gif'
+        img = MagicMock()
+        img.format.lower.return_value = 'gif'
+        pil_open.return_value = img
         with pytest.raises(ValueError) as excinfo:
             self.vrs.compare_faces('image_1.gif', 'image_2.gif')
         assert util.UNSUPPORTED_ERROR == str(excinfo.value)
 
-    @mock.patch('imghdr.what')
+    @mock.patch('ricohcloudsdk.vrs.util.Image.open')
     @mock.patch('os.path.isfile')
     @mock.patch('ricohcloudsdk.vrs.client.open')
-    def test_compare_faces_jpeg_uri(self, opn, isfile, imghdr):
+    def test_compare_faces_jpeg_uri(self, opn, isfile, pil_open):
         opn.side_effect = mock.mock_open()
         opn.read_data = b'readdata'
         isfile.side_effect = [True, False]
-        imghdr.return_value = 'jpeg'
+        img = MagicMock()
+        img.format.lower.return_value = 'jpeg'
+        pil_open.return_value = img
         with pytest.raises(ValueError) as excinfo:
             self.vrs.compare_faces(
                 'test_1.jpeg', 'https://test.co,/test.jpg'

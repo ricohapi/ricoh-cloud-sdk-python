@@ -3,10 +3,10 @@
 
 import json
 from unittest import TestCase
+import mock
 import pytest
 from requests.exceptions import RequestException
 from ricohcloudsdk.auth.client import AuthClient
-import mock
 
 ENDPOINT = 'https://auth.api.ricoh/v1/token'
 SCOPE = 'ips.api.ricoh/v1/detect_faces ips.api.ricoh/v1/compare_faces ips.api.ricoh/v1/detect_humans'

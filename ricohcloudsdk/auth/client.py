@@ -19,7 +19,8 @@ class AuthClient(object):
     SCOPES = {
         'vrs': ('ips.api.ricoh/v1/detect_faces',
                 'ips.api.ricoh/v1/compare_faces',
-                'ips.api.ricoh/v1/detect_humans')
+                'ips.api.ricoh/v1/detect_humans'),
+        'ips': ['vps.api.ricoh/v1/filter']
     }
 
     @staticmethod
